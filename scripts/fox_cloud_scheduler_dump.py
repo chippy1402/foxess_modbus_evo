@@ -20,6 +20,9 @@ import time
 import urllib.error
 import urllib.request
 from datetime import datetime
+from datetime import timezone
+from pathlib import Path
+from typing import Any
 
 BASE = "https://www.foxesscloud.com"
 # Fox returns these errnos when an API version isn't available for the device; try the next one.
@@ -32,11 +35,12 @@ class FoxError(Exception):
         self.errno = errno
 
 
-def _post(api_key: str, path: str, body: dict) -> object:
+def _post(api_key: str, path: str, body: dict[str, object]) -> Any:
     ts = str(round(time.time() * 1000))
     # Same as the plant app: md5(path + "\r\n" + token + "\r\n" + timestamp) with literal \r\n.
-    signature = hashlib.md5(rf"{path}\r\n{api_key}\r\n{ts}".encode()).hexdigest()
-    request = urllib.request.Request(
+    # Fox Cloud mandates MD5 for request signing; it is not used for password storage or security decisions.
+    signature = hashlib.md5(rf"{path}\r\n{api_key}\r\n{ts}".encode(), usedforsecurity=False).hexdigest()
+    request = urllib.request.Request(  # noqa: S310 - BASE is fixed to Fox Cloud HTTPS
         BASE + path,
         data=json.dumps(body).encode(),
         method="POST",
@@ -49,7 +53,7 @@ def _post(api_key: str, path: str, body: dict) -> object:
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=45) as response:
+        with urllib.request.urlopen(request, timeout=45) as response:  # noqa: S310 - fixed HTTPS URL
             data = json.loads(response.read().decode())
     except urllib.error.HTTPError as err:
         raise FoxError(f"HTTP {err.code} from {path}") from err
@@ -61,7 +65,7 @@ def _post(api_key: str, path: str, body: dict) -> object:
     return data.get("result")
 
 
-def _first_working(api_key: str, paths: list[str], body: dict) -> dict:
+def _first_working(api_key: str, paths: list[str], body: dict[str, object]) -> dict[str, object]:
     last: FoxError | None = None
     for path in paths:
         try:
@@ -95,7 +99,7 @@ def main() -> int:
 
     body = {"deviceSN": args.device_sn.strip()}
     output = {
-        "captured_at": datetime.now().isoformat(timespec="seconds"),
+        "captured_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "label": args.label,
         "deviceSN": body["deviceSN"],
         "schedule": _first_working(
@@ -112,8 +116,8 @@ def main() -> int:
 
     text = json.dumps(output, indent=2)
     print(text)
-    filename = f"fox_scheduler_{args.label}_{datetime.now():%Y%m%d_%H%M%S}.json"
-    with open(filename, "w", encoding="utf-8") as f:
+    filename = Path(f"fox_scheduler_{args.label}_{datetime.now(timezone.utc):%Y%m%d_%H%M%S}.json")
+    with filename.open("w", encoding="utf-8") as f:
         f.write(text + "\n")
     print(f"\nSaved to {filename}", file=sys.stderr)
     return 0

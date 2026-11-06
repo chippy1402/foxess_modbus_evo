@@ -24,7 +24,7 @@ from .inverter_model_spec import ModbusAddressesSpec
 from .modbus_entity_mixin import ModbusEntityMixin
 from .modbus_fault_sensor import FaultSet
 
-# FoxESS Modbus Protocol v1.05.03.00 section 4.1 — alarm bitfields at holding 39067–39069.
+# FoxESS Modbus Protocol v1.05.03.00 section 4.1 - alarm bitfields at holding 39067-39069.
 FOXESS_INVERTER_ALARMS = FaultSet(
     faults=[
         [
@@ -244,7 +244,7 @@ class ModbusAlarmSensor(ModbusEntityMixin, RestoreEntity, SensorEntity):
 
         if raised or cleared:
             self._last_event = format_alarm_event(raised, cleared)
-            self._log_alarm_changes(raised, cleared, active)
+            self._log_alarm_changes(raised, cleared)
             self._controller.hass.bus.fire(
                 f"{DOMAIN}_alarm",
                 {
@@ -262,7 +262,7 @@ class ModbusAlarmSensor(ModbusEntityMixin, RestoreEntity, SensorEntity):
         self._published = True
         self.schedule_update_ha_state()
 
-    def _log_alarm_changes(self, raised: set[str], cleared: set[str], active: set[str]) -> None:
+    def _log_alarm_changes(self, raised: set[str], cleared: set[str]) -> None:
         for alarm in sorted(raised):
             async_log_entry(
                 self._controller.hass,

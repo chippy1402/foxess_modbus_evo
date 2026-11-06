@@ -8,14 +8,14 @@ Status key: ✅ confirmed on hardware · ❓ not yet tested.
 
 ## Calls tested on an EVO 10-5-H
 
-| Call | Body | Result | Status |
-|---|---|---|---|
-| `POST /op/v0/device/list` | `{"currentPage":1,"pageSize":50}` | device list with `deviceSN`, `moduleSN` | ✅ |
-| `POST /op/v3/device/scheduler/get` | `{"deviceSN": …}` | scheduler groups (see [Mode Scheduler](mode-scheduler.md) for field mapping) and `maxGroupCount: 96` | ✅ but may be stale |
-| `POST /op/v1/device/scheduler/get/flag` | `{"deviceSN": …}` | `{"enable": …, "support": true}` | ✅ but `enable` does not track `48000` |
-| `POST /op/v0/device/batteryHeating/get` | `{"sn": …}` | warm-up enable, state, start/end temperature, 3 heating periods | ✅ |
-| `POST /op/v0/device/batteryHeating/get` | `{"deviceSN": …}` | errno 40257 "Parameters do not meet expectations" | ✅ use `sn` |
-| `POST /op/v0/device/setting/get` | `{"sn": …, "key": "WorkMode"}` | errno 42015 "does not currently support this feature" | ✅ |
+| Call                                    | Body                              | Result                                                                                               | Status                                 |
+| --------------------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `POST /op/v0/device/list`               | `{"currentPage":1,"pageSize":50}` | device list with `deviceSN`, `moduleSN`                                                              | ✅                                     |
+| `POST /op/v3/device/scheduler/get`      | `{"deviceSN": …}`                 | scheduler groups (see [Mode Scheduler](mode-scheduler.md) for field mapping) and `maxGroupCount: 96` | ✅ but may be stale                    |
+| `POST /op/v1/device/scheduler/get/flag` | `{"deviceSN": …}`                 | `{"enable": …, "support": true}`                                                                     | ✅ but `enable` does not track `48000` |
+| `POST /op/v0/device/batteryHeating/get` | `{"sn": …}`                       | warm-up enable, state, start/end temperature, 3 heating periods                                      | ✅                                     |
+| `POST /op/v0/device/batteryHeating/get` | `{"deviceSN": …}`                 | errno 40257 "Parameters do not meet expectations"                                                    | ✅ use `sn`                            |
+| `POST /op/v0/device/setting/get`        | `{"sn": …, "key": "WorkMode"}`    | errno 42015 "does not currently support this feature"                                                | ✅                                     |
 
 Signing: header `signature = md5(path + "\r\n" + token + "\r\n" + timestamp)` with a literal backslash-r
 backslash-n in the string, plus headers `token`, `timestamp` (ms) and `lang`. The API is rate-limited; keep

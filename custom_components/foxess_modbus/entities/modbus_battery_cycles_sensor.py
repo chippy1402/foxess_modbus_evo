@@ -11,13 +11,13 @@ from homeassistant.helpers.entity import Entity
 from ..common.entity_controller import EntityController
 from ..common.types import Inv
 from ..common.types import RegisterType
-from .validation import Min
 from .entity_factory import ENTITY_DESCRIPTION_KWARGS
 from .entity_factory import EntityFactory
 from .inverter_model_spec import EntitySpec
-from .inverter_model_spec import ModbusAddressSpec
 from .inverter_model_spec import ModbusAddressesSpec
+from .inverter_model_spec import ModbusAddressSpec
 from .modbus_entity_mixin import ModbusEntityMixin
+from .validation import Min
 
 
 @dataclass(kw_only=True, **ENTITY_DESCRIPTION_KWARGS)

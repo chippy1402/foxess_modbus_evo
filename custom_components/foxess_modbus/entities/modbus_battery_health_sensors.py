@@ -14,7 +14,7 @@ def battery_ah_remaining_from_soc_nominal(values: list[float]) -> float | None:
 
 
 def remaining_power_capacity_kw(values: list[float]) -> float | None:
-    """Max discharge power at present SOH: I_max × V_pack / 1000."""
+    """Max discharge power at present SOH: I_max x V_pack / 1000."""
     if len(values) != 3:
         return None
     max_discharge_a, pack_voltage_v, soh = values

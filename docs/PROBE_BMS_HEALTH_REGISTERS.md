@@ -15,13 +15,13 @@ When validating register mappings:
 
 ## What the public PDF documents
 
-| Registers | PDF name | Role |
-|-----------|----------|------|
-| 37609–37620 | Voltage, current, temps, cell mV | General / live |
-| **37621–37623** | *(not listed)* | **Gap — prime counter candidates** |
-| 37624 | BMS1 SOH | Health |
-| **37626–37631** | BMS1 Fault1–6 | **16-bit fault bitfields** |
-| 37632–37636 | Remain energy, FCC, design energy, force-charge flag | General |
+| Registers       | PDF name                                             | Role                               |
+| --------------- | ---------------------------------------------------- | ---------------------------------- |
+| 37609–37620     | Voltage, current, temps, cell mV                     | General / live                     |
+| **37621–37623** | _(not listed)_                                       | **Gap — prime counter candidates** |
+| 37624           | BMS1 SOH                                             | Health                             |
+| **37626–37631** | BMS1 Fault1–6                                        | **16-bit fault bitfields**         |
+| 37632–37636     | Remain energy, FCC, design energy, force-charge flag | General                            |
 
 The Ah throughput discovery (**37613** / **37614**) proved that Fox UI fields can live in PDF gaps with non-obvious scales. The same pattern likely applies to harmful events.
 
@@ -53,11 +53,11 @@ Or: `python3 -c "print(f'{12345:016b}')"` for a raw integer from `read_registers
 
 Your stable reads show:
 
-| Register | Raw | Notes |
-|----------|-----|-------|
-| **37621** | 2 | Fixed across reads — not SOC |
-| **37622** | 15 | Fixed; Fox cycles ≈13 — **close but not exact** |
-| **37623** | 0 | Fixed |
+| Register  | Raw | Notes                                           |
+| --------- | --- | ----------------------------------------------- |
+| **37621** | 2   | Fixed across reads — not SOC                    |
+| **37622** | 15  | Fixed; Fox cycles ≈13 — **close but not exact** |
+| **37623** | 0   | Fixed                                           |
 
 **37622 = 15** is the strongest lead for a **lifetime counter** (deep discharge count, partial cycles, or BMS-internal equivalent). Fox showing `--` for zero events does **not** rule this out if the counter measures something else (e.g. BMS cycle index).
 
@@ -70,12 +70,12 @@ Probe entities: `bms_gap_37621`, `bms_gap_37622`, `bms_gap_37623`.
 
 ## Health metrics (still unmapped)
 
-| Fox UI field | Likely source |
-|--------------|---------------|
-| Evolution of self-discharging rates | Unknown — may be trend computed in cloud **or** gap register with scale |
-| Remaining Power Capacity | Possibly derived from max discharge current × voltage / SOH; check **46616** + **37609** |
-| Remaining Round trip efficiency | May be BMS-internal; try gap registers or **37000–37199** block |
-| Ohmic resistance | Often mΩ — scan **37037–37096** (between slave versions and serials) |
+| Fox UI field                        | Likely source                                                                            |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| Evolution of self-discharging rates | Unknown — may be trend computed in cloud **or** gap register with scale                  |
+| Remaining Power Capacity            | Possibly derived from max discharge current × voltage / SOH; check **46616** + **37609** |
+| Remaining Round trip efficiency     | May be BMS-internal; try gap registers or **37000–37199** block                          |
+| Ohmic resistance                    | Often mΩ — scan **37037–37096** (between slave versions and serials)                     |
 
 **37616** / **37625** (= 500 → **50 Ah** at ×0.1) duplicate **FCC** at 100% SOC — not remaining power capacity.
 
@@ -99,19 +99,19 @@ Compare **37037–37096** against Fox health rows.
 
 ### EVO scan result (37000–37119, 2026-05)
 
-| Range | Finding |
-|-------|---------|
-| **37002** | `1` = BMS1 online (matches `bms_online`) |
-| **37003–37004** | Master version `257` (0x0101), control type `113` |
-| **37005–37012** | Master SN ASCII — mirrors pack 1 serial start |
-| **37013–37031** | All `0` (padding) |
-| **37032** | `4` = four slave packs |
+| Range           | Finding                                                                                                                                 |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **37002**       | `1` = BMS1 online (matches `bms_online`)                                                                                                |
+| **37003–37004** | Master version `257` (0x0101), control type `113`                                                                                       |
+| **37005–37012** | Master SN ASCII — mirrors pack 1 serial start                                                                                           |
+| **37013–37031** | All `0` (padding)                                                                                                                       |
+| **37032**       | `4` = four slave packs                                                                                                                  |
 | **37033–37036** | `0x1000` … `0x4000` = slave 1–4 version tokens — decode as `{(v>>12)}.{(v&0xFFF):03d}` (e.g. `0x1001` → **1.001**, Fox **Version_BCU**) |
-| **37037–37064** | All `0` — **no health counters here** |
-| **37065–37068** | All `255` — likely **per-pack manufacture date** sentinels (Fox shows `--`) |
-| **37069–37096** | All `0` |
-| **37097–37104** | Pack 1 serial → e.g. `6086372058LT085` |
-| **37113–37118** | Pack 2 serial **starts identical** to pack 1 in partial read — read **37113–37128** fully |
+| **37037–37064** | All `0` — **no health counters here**                                                                                                   |
+| **37065–37068** | All `255` — likely **per-pack manufacture date** sentinels (Fox shows `--`)                                                             |
+| **37069–37096** | All `0`                                                                                                                                 |
+| **37097–37104** | Pack 1 serial → e.g. `6086372058LT085`                                                                                                  |
+| **37113–37118** | Pack 2 serial **starts identical** to pack 1 in partial read — read **37113–37128** fully                                               |
 
 **Conclusion:** Health / harmful-event **counters are not in 37000–37119**. Continue with **37621–37623** and **37626–37631**, and read **37120–37160** for packs 2–4 serials (Expected life grid).
 
@@ -119,14 +119,14 @@ Compare **37037–37096** against Fox health rows.
 
 Until Fox-exact registers are found, `foxess_modbus` exposes **estimated** health rows from existing inputs (`modbus_battery_health_sensors.py`):
 
-| Entity key | Formula (summary) |
-|------------|-------------------|
-| `battery_ah_remaining` | SOC × **37616** nominal Ah / 100 (direct Modbus read, Fox parity) |
-| `bms_remaining_power_capacity` | `max_discharge_current × batvolt_1 / 1000 × SOH/100` |
-| `bms_round_trip_efficiency_remaining` | `discharge_total / charge_total × 100`, capped by SOH |
-| `bms_ohmic_resistance` | Δcell mV / \|current\| under load; SOH baseline at rest |
-| `bms_self_discharge_rate` | Low baseline + wear from (100−SOH) and cycles (%/day) |
-| `bms_deep_discharge_event_count` etc. | Placeholder **0** until counters mapped |
+| Entity key                            | Formula (summary)                                                 |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| `battery_ah_remaining`                | SOC × **37616** nominal Ah / 100 (direct Modbus read, Fox parity) |
+| `bms_remaining_power_capacity`        | `max_discharge_current × batvolt_1 / 1000 × SOH/100`              |
+| `bms_round_trip_efficiency_remaining` | `discharge_total / charge_total × 100`, capped by SOH             |
+| `bms_ohmic_resistance`                | Δcell mV / \|current\| under load; SOH baseline at rest           |
+| `bms_self_discharge_rate`             | Low baseline + wear from (100−SOH) and cycles (%/day)             |
+| `bms_deep_discharge_event_count` etc. | Placeholder **0** until counters mapped                           |
 
 Tune formulas when Fox eventually shows non-`--` values on an aged pack.
 

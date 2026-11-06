@@ -28,10 +28,10 @@ data:
 When an action fails with "Unknown error", the real reason is in **Settings → System → Logs** (search
 `Failed to write registers`). The Modbus exception code tells you what happened:
 
-| Code | Name | Meaning in practice |
-|---|---|---|
-| 2 | `IllegalAddress` | the address — or the **shape** of the write, e.g. part of a block — isn't accepted |
-| 3 | `IllegalValue` | the write is allowed, but this **value** isn't (e.g. Max SoC below Max SoC From Grid) |
+| Code | Name             | Meaning in practice                                                                   |
+| ---- | ---------------- | ------------------------------------------------------------------------------------- |
+| 2    | `IllegalAddress` | the address — or the **shape** of the write, e.g. part of a block — isn't accepted    |
+| 3    | `IllegalValue`   | the write is allowed, but this **value** isn't (e.g. Max SoC below Max SoC From Grid) |
 
 (The first number in `Exception Response(134, 6, …)` is the function code + 128: 134 = write single
 register, 144 = write multiple registers.)
@@ -76,14 +76,14 @@ the exception code straight away. Keep each connection short, and match replies 
 
 ## Value encodings seen on the EVO
 
-| Kind | Encoding | Example |
-|---|---|---|
-| Time of day | `hour × 256 + minute` | 01:05 → `261`, 23:59 → `5947` |
-| Two percentages in one register | `high × 256 + low` | max 85 / min 30 → `21790` |
-| Firmware version | hex digits `major.minor` | `0x0121` → 1.21 |
-| BCU version | high byte `.` low byte as 3 digits | `0x0104` → 1.004 |
-| Protocol version | 2 registers → 4 bytes | `0x0105`, `0x0400` → V1.05.04.00 |
-| Text | ASCII, 2 characters per register | `0x4556`, `0x4F20` → "EVO " |
+| Kind                            | Encoding                           | Example                          |
+| ------------------------------- | ---------------------------------- | -------------------------------- |
+| Time of day                     | `hour × 256 + minute`              | 01:05 → `261`, 23:59 → `5947`    |
+| Two percentages in one register | `high × 256 + low`                 | max 85 / min 30 → `21790`        |
+| Firmware version                | hex digits `major.minor`           | `0x0121` → 1.21                  |
+| BCU version                     | high byte `.` low byte as 3 digits | `0x0104` → 1.004                 |
+| Protocol version                | 2 registers → 4 bytes              | `0x0105`, `0x0400` → V1.05.04.00 |
+| Text                            | ASCII, 2 characters per register   | `0x4556`, `0x4F20` → "EVO "      |
 
 ## Open questions
 

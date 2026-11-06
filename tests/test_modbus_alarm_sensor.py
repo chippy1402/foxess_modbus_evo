@@ -1,3 +1,6 @@
+# ruff: noqa: SLF001 - these regression tests intentionally drive and restore entity internals
+# mypy: disable-error-code="method-assign"
+
 from unittest.mock import MagicMock
 
 from custom_components.foxess_modbus.entities.modbus_alarm_sensor import FOXESS_INVERTER_ALARMS
@@ -34,7 +37,8 @@ def test_alarm_sensor_records_last_event_only_on_change() -> None:
     controller.hass.bus = MagicMock()
     poll = {"n": 0}
 
-    def mock_read(address, signed=False):
+    def mock_read(address: int, signed: bool = False) -> int:
+        del signed
         if address == 39069 and poll["n"] >= 1:
             return 0x0200
         return 0
@@ -72,7 +76,9 @@ def test_alarm_sensor_records_last_event_only_on_change() -> None:
 
 def test_alarm_sensor_state_survives_a_restart() -> None:
     controller = MagicMock()
-    controller.read.side_effect = lambda address, signed=False: 0x0200 if address == 39069 else 0  # meter lost
+    controller.read.side_effect = (  # keyword name must match controller.read
+        lambda address, signed=False: 0x0200 if address == 39069 else 0  # noqa: ARG005 - mock signature
+    )
     description = ModbusAlarmSensorDescription(
         key="inverter_alarm_last",
         addresses=[],

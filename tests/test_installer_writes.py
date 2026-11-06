@@ -1,8 +1,10 @@
-"""EVO installer settings: guarded writes (live read, unchanged skip, one change a minute, whole-block writes, read-back).
+"""EVO installer settings with guarded writes.
 
-The fake inverter accepts only the write shapes an EVO 10-5-H accepted when tested: the 46616-46617 pair, 46503 alone
-and the whole 46501-46514 block (46501-46502 / 46504-46505 on their own are refused with "illegal address").
+The fake inverter accepts only the write shapes an EVO 10-5-H accepted when tested: the 46616-46617 pair,
+46503 alone and the whole 46501-46514 block (46501-46502 / 46504-46505 alone are refused).
 """
+
+# mypy: disable-error-code="attr-defined,misc"
 
 import pytest
 from homeassistant.exceptions import HomeAssistantError
@@ -166,7 +168,10 @@ def test_kh_export_limit_number_is_unchanged() -> None:
         for d in ENTITIES
         if isinstance(d, ModbusNumberDescription)
         and d.key == "export_power_limit"
-        and d._addresses_for_inverter_model(d.addresses, Inv.KH_133, RegisterType.HOLDING) is not None
+        and d._addresses_for_inverter_model(  # noqa: SLF001 - verifies model filtering directly
+            d.addresses, Inv.KH_133, RegisterType.HOLDING
+        )
+        is not None
     ]
     assert len(kh) == 1
     assert kh[0].min_write_interval is None and kh[0].write_block is None
