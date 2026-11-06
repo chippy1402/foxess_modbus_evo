@@ -5,9 +5,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from custom_components.foxess_modbus.entities.modbus_battery_status_sensor import ModbusBatteryStatusSensor
-from custom_components.foxess_modbus.entities.modbus_battery_status_sensor import (
-    ModbusBatteryStatusSensorDescription,
-)
+from custom_components.foxess_modbus.entities.modbus_battery_status_sensor import ModbusBatteryStatusSensorDescription
 
 
 def _make_sensor(
@@ -17,7 +15,8 @@ def _make_sensor(
 ) -> ModbusBatteryStatusSensor:
     controller = MagicMock()
 
-    def read(address, *, signed: bool):  # noqa: ANN001
+    def read(address: int | list[int], *, signed: bool) -> int | None:
+        del signed
         if address == 37002:
             return bms_state
         if address == [39231, 39230]:

@@ -4,7 +4,7 @@ Community notes on controlling a **FoxESS EVO** inverter over Modbus, based on t
 
 ## Why this exists
 
-The only Modbus document FoxESS has published (*Modbus Protocol V1.05.03.00*, January 2025) **does not
+The only Modbus document FoxESS has published (_Modbus Protocol V1.05.03.00_, January 2025) **does not
 mention the EVO**, and the EVO reports a newer protocol version (V1.05.04.00) than that document describes.
 Integrations built from it — and from trial and error — have repeatedly concluded things that turned out to
 be wrong ("max SoC is read-only", "the cloud makes the scheduler read-only", "the scheduler can't be written
@@ -13,12 +13,12 @@ comparing with the Fox app and Fox Cloud.
 
 ## Tested on
 
-| | |
-|---|---|
-| Model | EVO 10-5-H, 1 battery pack, Modbus TCP (slave 247) |
-| Modbus protocol version | V1.05.04.00 |
-| Firmware | Master 1.21, Slave 1.01, Manager 1.20, BCU 1.004 |
-| Date | October 2026 |
+|                         |                                                    |
+| ----------------------- | -------------------------------------------------- |
+| Model                   | EVO 10-5-H, 1 battery pack, Modbus TCP (slave 247) |
+| Modbus protocol version | V1.05.04.00                                        |
+| Firmware                | Master 1.21, Slave 1.01, Manager 1.20, BCU 1.004   |
+| Date                    | October 2026                                       |
 
 Other EVO models and firmware may differ. Please share results from yours (see
 [testing method](testing-method.md)).

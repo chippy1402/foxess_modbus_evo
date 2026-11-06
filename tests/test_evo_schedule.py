@@ -3,6 +3,8 @@
 See docs/evo/mode-scheduler.md for how these captures were made.
 """
 
+# mypy: disable-error-code="assignment"
+
 from dataclasses import replace
 from datetime import time
 from typing import Any

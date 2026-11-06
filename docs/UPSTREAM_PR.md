@@ -17,9 +17,9 @@ Goal: PRs to [`nathanmarlor/foxess_modbus`](https://github.com/nathanmarlor/foxe
 
 Upstream expects **zip releases** (`zip_release` + `foxess_modbus.zip` from tagged releases). That is the author’s intended HACS path.
 
-| Branch | `hacs.json` |
-|--------|-------------|
-| **This fork `main`** | No `zip_release` — source install for dev/testing |
+| Branch                 | `hacs.json`                                         |
+| ---------------------- | --------------------------------------------------- |
+| **This fork `main`**   | No `zip_release` — source install for dev/testing   |
 | **Upstream PR branch** | **Unchanged** — keep upstream’s `zip_release` block |
 
 When preparing a PR, confirm `hacs.json` matches upstream:

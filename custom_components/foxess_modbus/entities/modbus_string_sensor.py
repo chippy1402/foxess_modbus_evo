@@ -2,7 +2,6 @@
 
 from dataclasses import dataclass
 from typing import Any
-from typing import cast
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorEntityDescription
@@ -128,7 +127,7 @@ class ModbusStringSensor(ModbusEntityMixin, SensorEntity):
 
 @dataclass(kw_only=True, **ENTITY_DESCRIPTION_KWARGS)
 class ModbusProtocolVersionSensorDescription(SensorEntityDescription, EntityFactory):  # type: ignore[misc]
-    """FoxESS 32-bit protocol version at two consecutive holding registers (39000–39001)."""
+    """FoxESS 32-bit protocol version at two consecutive holding registers (39000-39001)."""
 
     address: list[ModbusAddressSpec]
 

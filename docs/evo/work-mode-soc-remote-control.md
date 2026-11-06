@@ -4,13 +4,13 @@ Status key: ✅ confirmed on hardware · ⚠️ differs from the FoxESS protocol
 
 ## Work mode (49203)
 
-| Value | Mode | Status |
-|---|---|---|
-| 1 | Self Use | ✅ |
-| 2 | Feed-in First | ✅ |
-| 3 | Back-up | ✅ |
-| 4 | Peak Shaving | ❓ |
-| 255 | under external Remote Control (read-only state) | ✅ ⚠️ not in the FoxESS document |
+| Value | Mode                                            | Status                           |
+| ----- | ----------------------------------------------- | -------------------------------- |
+| 1     | Self Use                                        | ✅                               |
+| 2     | Feed-in First                                   | ✅                               |
+| 3     | Back-up                                         | ✅                               |
+| 4     | Peak Shaving                                    | ❓                               |
+| 255   | under external Remote Control (read-only state) | ✅ ⚠️ not in the FoxESS document |
 
 - ✅ **Writes use the same 1-based codes as reads.** Writing `2` reads back `2` and the Fox app shows Feed-in
   First. (Some integrations wrote 0-based values, e.g. `1` for Feed-in — which sets Self Use and looks like
@@ -24,21 +24,21 @@ Status key: ✅ confirmed on hardware · ⚠️ differs from the FoxESS protocol
 
 Values below were read from the test inverter with the scheduler off.
 
-| Register | Meaning | Read | Status |
-|---|---|---|---|
-| `46607` | Battery max charge current (A ×10) | 500 → 50.0 A | value consistent with the document; writes ❓ |
-| `46608` | Battery max discharge current (A ×10) | 500 → 50.0 A | value consistent with the document; writes ❓ |
-| `46609` | Minimum SoC (off-grid) % | 10 | ✅ writable (FC6) |
-| `46610` | System Max SoC % | 100 | ✅ writable (FC6) — but see the rule below |
-| `46611` | Minimum SoC on grid % | 10 | ✅ |
-| `46612` | EPS frequency (1 = 50 Hz, 2 = 60 Hz) | 1 | value consistent with the document |
-| `46613` | EPS output (0 disable, 2 EPS, 3 UPS) | 3 | value consistent with the document |
-| `46614` | Balance load (0/1) | 0 | ❓ — **not** the import power limit, whatever some sources say (that's `46501`–`46502`) |
-| `46615` | Balance logic first (0/1) | 0 | ❓ |
-| `46616`–`46617` | Export power limit, W (I32) | 0, 15000 → 15000 W | ✅ writable (both registers in one write) — see [installer settings](installer-settings.md#writable-settings) |
-| `46618` | Import current limit (A ×10) | 320 → 32.0 A | value consistent with the document |
-| `46619` | Export current limit (A ×10) | 630 → 63.0 A | value consistent with the document |
-| `46620` | **Max SoC From Grid** % | 100 | ✅ ⚠️ **not in the FoxESS document** |
+| Register        | Meaning                               | Read               | Status                                                                                                        |
+| --------------- | ------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `46607`         | Battery max charge current (A ×10)    | 500 → 50.0 A       | value consistent with the document; writes ❓                                                                 |
+| `46608`         | Battery max discharge current (A ×10) | 500 → 50.0 A       | value consistent with the document; writes ❓                                                                 |
+| `46609`         | Minimum SoC (off-grid) %              | 10                 | ✅ writable (FC6)                                                                                             |
+| `46610`         | System Max SoC %                      | 100                | ✅ writable (FC6) — but see the rule below                                                                    |
+| `46611`         | Minimum SoC on grid %                 | 10                 | ✅                                                                                                            |
+| `46612`         | EPS frequency (1 = 50 Hz, 2 = 60 Hz)  | 1                  | value consistent with the document                                                                            |
+| `46613`         | EPS output (0 disable, 2 EPS, 3 UPS)  | 3                  | value consistent with the document                                                                            |
+| `46614`         | Balance load (0/1)                    | 0                  | ❓ — **not** the import power limit, whatever some sources say (that's `46501`–`46502`)                       |
+| `46615`         | Balance logic first (0/1)             | 0                  | ❓                                                                                                            |
+| `46616`–`46617` | Export power limit, W (I32)           | 0, 15000 → 15000 W | ✅ writable (both registers in one write) — see [installer settings](installer-settings.md#writable-settings) |
+| `46618`         | Import current limit (A ×10)          | 320 → 32.0 A       | value consistent with the document                                                                            |
+| `46619`         | Export current limit (A ×10)          | 630 → 63.0 A       | value consistent with the document                                                                            |
+| `46620`         | **Max SoC From Grid** %               | 100                | ✅ ⚠️ **not in the FoxESS document**                                                                          |
 
 ### The Max SoC rule
 

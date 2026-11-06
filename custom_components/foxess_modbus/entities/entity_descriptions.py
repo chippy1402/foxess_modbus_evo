@@ -18,13 +18,20 @@ from .entity_factory import EntityFactory
 from .inverter_model_spec import EntitySpec
 from .inverter_model_spec import ModbusAddressesSpec
 from .inverter_model_spec import ModbusAddressSpec
-from .modbus_battery_cycles_sensor import ModbusBatteryCyclesSensorDescription
-from .modbus_battery_kwh_remaining_sensor import ModbusBatteryKwhRemainingSensorDescription
-from .modbus_battery_status_sensor import ModbusBatteryStatusSensorDescription
-from .modbus_battery_sensor import ModbusBatterySensorDescription
 from .modbus_alarm_sensor import FOXESS_INVERTER_ALARMS
 from .modbus_alarm_sensor import AlarmSensorMode
 from .modbus_alarm_sensor import ModbusAlarmSensorDescription
+from .modbus_battery_ah_remaining_sensor import ModbusBatteryAhRemainingSensorDescription
+from .modbus_battery_cycles_sensor import ModbusBatteryCyclesSensorDescription
+from .modbus_battery_health_sensors import harmful_event_count_zero
+from .modbus_battery_health_sensors import ohmic_resistance_milliohm
+from .modbus_battery_health_sensors import remaining_power_capacity_kw
+from .modbus_battery_health_sensors import round_trip_efficiency_remaining_percent
+from .modbus_battery_health_sensors import self_discharge_rate_percent_per_day
+from .modbus_battery_kwh_remaining_sensor import ModbusBatteryKwhRemainingSensorDescription
+from .modbus_battery_sensor import ModbusBatterySensorDescription
+from .modbus_battery_status_sensor import ModbusBatteryStatusSensorDescription
+from .modbus_binary_sensor import ModbusBinarySensorDescription
 from .modbus_fault_sensor import H3_PRO_KH_133_FAULTS
 from .modbus_fault_sensor import STANDARD_FAULTS
 from .modbus_fault_sensor import FaultSet
@@ -35,17 +42,10 @@ from .modbus_inverter_state_sensor import H1_INVERTER_STATES
 from .modbus_inverter_state_sensor import KH_INVERTER_STATES
 from .modbus_inverter_state_sensor import ModbusG2InverterStateSensorDescription
 from .modbus_inverter_state_sensor import ModbusInverterStateSensorDescription
-from .modbus_battery_ah_remaining_sensor import ModbusBatteryAhRemainingSensorDescription
-from .modbus_battery_health_sensors import harmful_event_count_zero
-from .modbus_battery_health_sensors import ohmic_resistance_milliohm
-from .modbus_battery_health_sensors import remaining_power_capacity_kw
-from .modbus_battery_health_sensors import round_trip_efficiency_remaining_percent
-from .modbus_battery_health_sensors import self_discharge_rate_percent_per_day
 from .modbus_lambda_sensor import ModbusLambdaSensorDescription
 from .modbus_number import ModbusNumberDescription
 from .modbus_select import ModbusSelectDescription
 from .modbus_sensor import ModbusSensorDescription
-from .modbus_binary_sensor import ModbusBinarySensorDescription
 from .modbus_string_sensor import ModbusProtocolVersionSensorDescription
 from .modbus_string_sensor import ModbusStringSensorDescription
 from .modbus_time_period_sensor import ModbusTimePeriodSensorDescription
@@ -260,7 +260,7 @@ def _installer_setting_entities() -> Iterable[EntityFactory]:
             validate=[Range(0, 1000)],
         )
     yield _kw("installer_import_power_limit", [46502, 46501], "Import Power Limit (Installer)")
-    # Peak shaving (work mode 4): 46500 itself refuses reads on the EVO; 46501–46514 read fine
+    # Peak shaving (work mode 4): 46500 itself refuses reads on the EVO; 46501-46514 read fine
     yield _kw("peak_shaving_export_limit", [46505, 46504], "Peak Shaving Export Limit")
     yield ModbusSensorDescription(
         key="peak_shaving_threshold_soc",
@@ -3009,7 +3009,8 @@ def _bms_entities() -> Iterable[EntityFactory]:
         bms_cell_mv_low=[ModbusAddressesSpec(holding=[37620], models=Inv.H3_PRO_SET | Inv.H3_SMART)],
         bms_kwh_remaining=[ModbusAddressesSpec(holding=[37632], models=Inv.H3_PRO_SET | Inv.H3_SMART)],
     )
-    # EVO 10-H BMS pack registers (37xxx). SoC/SoH: 37612 and 39423 track app SoC; 37624 is SoH (39423 was mis-mapped as SoH).
+    # EVO 10-H BMS pack registers (37xxx). SoC/SoH: 37612 and 39423 track app SoC;
+    # 37624 is SoH (39423 was mis-mapped as SoH).
     yield from _inner(
         index=1,
         bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=Inv.EVO)],
@@ -3080,12 +3081,12 @@ def _bms_entities() -> Iterable[EntityFactory]:
         icon="mdi:counter",
     )
 
-    _BMS_PACK1_EXTENDED = Inv.H3_PRO_SET | Inv.H3_SMART | Inv.EVO
+    bms_pack1_extended = Inv.H3_PRO_SET | Inv.H3_SMART | Inv.EVO
     # H3-Pro reserves 37633-37699 (invalid_register_ranges in inverter_profiles.py), so sensors above
     # 37632 must exclude it; they still apply to H3 Smart and EVO.
-    _BMS_PACK1_EXTENDED_NO_H3PRO = Inv.H3_SMART | Inv.EVO
-    # Fox-style derived health metrics (EVO only — entity keys differ on multi-pack H3).
-    _BMS_HEALTH_MODELS = [
+    bms_pack1_extended_no_h3pro = Inv.H3_SMART | Inv.EVO
+    # Fox-style derived health metrics (EVO only - entity keys differ on multi-pack H3).
+    bms_health_models = [
         EntitySpec(
             register_types=[RegisterType.HOLDING],
             models=Inv.EVO,
@@ -3093,8 +3094,8 @@ def _bms_entities() -> Iterable[EntityFactory]:
     ]
     yield ModbusBatterySensorDescription(
         key="bms_ah_fcc",
-        addresses=[ModbusAddressesSpec(holding=[37633], models=_BMS_PACK1_EXTENDED_NO_H3PRO)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED_NO_H3PRO)],
+        addresses=[ModbusAddressesSpec(holding=[37633], models=bms_pack1_extended_no_h3pro)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended_no_h3pro)],
         name="BMS FCC Capacity",
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement="Ah",
@@ -3104,13 +3105,13 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusBatterySensorDescription(
         key="bms_design_energy_wh",
-        addresses=[ModbusAddressesSpec(holding=[37635], models=_BMS_PACK1_EXTENDED_NO_H3PRO)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED_NO_H3PRO)],
+        addresses=[ModbusAddressesSpec(holding=[37635], models=bms_pack1_extended_no_h3pro)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended_no_h3pro)],
         name="BMS Design Energy",
         device_class=SensorDeviceClass.ENERGY_STORAGE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement="Wh",
-        # EVO live read: raw 1024 → Fox Capacity 10240 Wh (×10, not PDF 0.1).
+        # EVO live read: raw 1024 gives Fox Capacity 10240 Wh (x10, not PDF 0.1).
         scale=10,
         signed=False,
         validate=[Min(0)],
@@ -3118,8 +3119,8 @@ def _bms_entities() -> Iterable[EntityFactory]:
     # Fox app "Remaining Capacity" (Ah) tracks nominal bucket 37616, not live FCC 37633.
     yield ModbusBatterySensorDescription(
         key="bms_ah_nominal",
-        addresses=[ModbusAddressesSpec(holding=[37616], models=_BMS_PACK1_EXTENDED)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED)],
+        addresses=[ModbusAddressesSpec(holding=[37616], models=bms_pack1_extended)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended)],
         name="BMS Nominal Capacity",
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement="Ah",
@@ -3132,12 +3133,12 @@ def _bms_entities() -> Iterable[EntityFactory]:
         models=[
             EntitySpec(
                 register_types=[RegisterType.HOLDING],
-                models=_BMS_PACK1_EXTENDED,
+                models=bms_pack1_extended,
             ),
         ],
-        soc_address=[ModbusAddressSpec(holding=37612, models=_BMS_PACK1_EXTENDED)],
-        capacity_address=[ModbusAddressSpec(holding=37616, models=_BMS_PACK1_EXTENDED)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED)],
+        soc_address=[ModbusAddressSpec(holding=37612, models=bms_pack1_extended)],
+        capacity_address=[ModbusAddressSpec(holding=37616, models=bms_pack1_extended)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended)],
         capacity_scale=0.1,
         name="Battery Remaining Capacity",
         state_class=SensorStateClass.MEASUREMENT,
@@ -3146,7 +3147,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_remaining_power_capacity",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["max_discharge_current", "batvolt_1", "battery_soh"],
         method=remaining_power_capacity_kw,
         name="BMS Remaining Power Capacity",
@@ -3157,7 +3158,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_round_trip_efficiency_remaining",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["battery_discharge_total", "battery_charge_total", "battery_soh"],
         method=round_trip_efficiency_remaining_percent,
         name="BMS Remaining Round Trip Efficiency",
@@ -3167,7 +3168,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_ohmic_resistance",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["bms_cell_mv_high_1", "bms_cell_mv_low_1", "bat_current_1", "battery_soh"],
         method=ohmic_resistance_milliohm,
         name="BMS Ohmic Resistance",
@@ -3177,7 +3178,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_self_discharge_rate",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["battery_soh", "battery_cycles"],
         method=self_discharge_rate_percent_per_day,
         name="BMS Self Discharge Rate",
@@ -3187,7 +3188,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_deep_discharge_event_count",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["battery_soh"],
         method=harmful_event_count_zero,
         name="BMS Deep Discharge Event Count",
@@ -3196,7 +3197,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_extreme_temp_hours",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["battery_soh"],
         method=harmful_event_count_zero,
         name="BMS Extreme Temperature Hours",
@@ -3206,7 +3207,7 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusLambdaSensorDescription(
         key="bms_extreme_temp_charge_hours",
-        models=_BMS_HEALTH_MODELS,
+        models=bms_health_models,
         sources=["battery_soh"],
         method=harmful_event_count_zero,
         name="BMS Extreme Temperature Charge Hours",
@@ -3214,11 +3215,11 @@ def _bms_entities() -> Iterable[EntityFactory]:
         native_unit_of_measurement="h",
         icon="mdi:battery-charging",
     )
-    # EVO/H3: gap 37613–37614 — lifetime Ah throughput totals (drift vs Fox UI if read minutes apart).
+    # EVO/H3: gap 37613-37614 - lifetime Ah throughput totals (drift vs Fox UI if read minutes apart).
     yield ModbusBatterySensorDescription(
         key="bms_discharge_capacity_throughput_ah",
-        addresses=[ModbusAddressesSpec(holding=[37613], models=_BMS_PACK1_EXTENDED)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED)],
+        addresses=[ModbusAddressesSpec(holding=[37613], models=bms_pack1_extended)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended)],
         name="BMS Discharge Capacity Throughput",
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement="Ah",
@@ -3228,8 +3229,8 @@ def _bms_entities() -> Iterable[EntityFactory]:
     )
     yield ModbusBatterySensorDescription(
         key="bms_charge_capacity_throughput_ah",
-        addresses=[ModbusAddressesSpec(holding=[37614], models=_BMS_PACK1_EXTENDED)],
-        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED)],
+        addresses=[ModbusAddressesSpec(holding=[37614], models=bms_pack1_extended)],
+        bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended)],
         name="BMS Charge Capacity Throughput",
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement="Ah",
@@ -3247,8 +3248,8 @@ def _bms_entities() -> Iterable[EntityFactory]:
     ):
         yield ModbusBatterySensorDescription(
             key=f"bms_fault_{fault_index}_raw",
-            addresses=[ModbusAddressesSpec(holding=[address], models=_BMS_PACK1_EXTENDED)],
-            bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=_BMS_PACK1_EXTENDED)],
+            addresses=[ModbusAddressesSpec(holding=[address], models=bms_pack1_extended)],
+            bms_connect_state_address=[ModbusAddressSpec(holding=37002, models=bms_pack1_extended)],
             name=f"BMS1 Fault{fault_index} Raw",
             state_class=SensorStateClass.MEASUREMENT,
             signed=False,

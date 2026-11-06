@@ -18,18 +18,18 @@ enabled, is used.
 
 ## Layout
 
-| Register | Field | Encoding | Example |
-|---|---|---|---|
-| `53400` | Warm-up enabled | 0 off, 1 on | `1` |
-| `53401` | Start temperature | °C | `7` |
-| `53402` | End temperature | °C | `13` |
-| `53403` | Period 1 enabled | 0 / 1 | `1` |
-| `53404` | Period 1 start | `hour × 256 + minute` | `267` = 01:11 |
-| `53405` | Period 1 end | `hour × 256 + minute` | `534` = 02:22 |
-| `53406`–`53408` | Period 2 enabled, start, end | as period 1 | `1`, 03:17, 04:43 |
-| `53409`–`53411` | Period 3 enabled, start, end | as period 1 | `1`, 05:29, 06:52 |
-| `53412`–`53414` | ❓ unknown — same shape as a period | as period 1 | `1`, 01:09, 05:15 |
-| `53415`–`53427` | ❓ unknown, all 0 | | |
+| Register        | Field                               | Encoding              | Example           |
+| --------------- | ----------------------------------- | --------------------- | ----------------- |
+| `53400`         | Warm-up enabled                     | 0 off, 1 on           | `1`               |
+| `53401`         | Start temperature                   | °C                    | `7`               |
+| `53402`         | End temperature                     | °C                    | `13`              |
+| `53403`         | Period 1 enabled                    | 0 / 1                 | `1`               |
+| `53404`         | Period 1 start                      | `hour × 256 + minute` | `267` = 01:11     |
+| `53405`         | Period 1 end                        | `hour × 256 + minute` | `534` = 02:22     |
+| `53406`–`53408` | Period 2 enabled, start, end        | as period 1           | `1`, 03:17, 04:43 |
+| `53409`–`53411` | Period 3 enabled, start, end        | as period 1           | `1`, 05:29, 06:52 |
+| `53412`–`53414` | ❓ unknown — same shape as a period | as period 1           | `1`, 01:09, 05:15 |
+| `53415`–`53427` | ❓ unknown, all 0                   |                       |                   |
 
 The example values are test settings entered in the Fox app (chosen so each field could only match one
 register), confirmed against the Fox Cloud's `batteryHeating/get` at the same time. Times use the same
@@ -43,9 +43,9 @@ us. A factory default or a hidden period are both possible — reports from othe
 Tested by writing the current values back unchanged. Directly over Modbus TCP, so the inverter's reply could
 be seen:
 
-| Write | Reply |
-|---|---|
-| Write single register (FC6) `53401` | ❌ exception 2 `IllegalAddress` |
+| Write                                         | Reply                           |
+| --------------------------------------------- | ------------------------------- |
+| Write single register (FC6) `53401`           | ❌ exception 2 `IllegalAddress` |
 | Write multiple (FC16) `53400` × 3, × 15, × 28 | ❌ exception 2 `IllegalAddress` |
 
 Through `foxess_modbus.write_registers`, which doesn't show the code: FC6 `53400` and `53401`, and FC16
@@ -76,7 +76,7 @@ DNS-based interception can't see it; it would need routing-level redirection, wh
 phone app did reach the proxy and rejected its certificate.)
 
 The same writes were refused in the same way with warm-up switched **off** in the app, so it isn't the
-feature being active that locks the registers. Unlike the Mode Scheduler, where the *shape* of a write
+feature being active that locks the registers. Unlike the Mode Scheduler, where the _shape_ of a write
 matters, no shape was accepted here.
 
 Changes made in the app reached these registers within a couple of minutes. Turning warm-up off cleared

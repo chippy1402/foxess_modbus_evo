@@ -6,12 +6,12 @@ This repo ([chippy1402/foxess_modbus_evo](https://github.com/chippy1402/foxess_m
 
 ## Important differences from AdamNewberry’s fork
 
-| | AdamNewberry `main` | markybry `feature/evo-10h-fixes` |
-|---|---|---|
-| HA domain | `foxess_modbus_evo` | `foxess_modbus` |
-| Integration name in HA | FoxESS - Modbus (EVO) | FoxESS - Modbus |
-| EVO charge periods | 41xxx (incorrect on many EVO units) | **48010–48023** |
-| Work mode value 255 | Often missing | **Remote Control** |
+|                        | AdamNewberry `main`                 | markybry `feature/evo-10h-fixes` |
+| ---------------------- | ----------------------------------- | -------------------------------- |
+| HA domain              | `foxess_modbus_evo`                 | `foxess_modbus`                  |
+| Integration name in HA | FoxESS - Modbus (EVO)               | FoxESS - Modbus                  |
+| EVO charge periods     | 41xxx (incorrect on many EVO units) | **48010–48023**                  |
+| Work mode value 255    | Often missing                       | **Remote Control**               |
 
 Do **not** run both integrations against the same inverter.
 
@@ -84,7 +84,7 @@ New sensors/controls are defined in Python, not YAML.
 1. Find the **holding register** address in the protocol doc (EVO uses **holding** registers on **AUX**).
 2. Add a description in `custom_components/foxess_modbus/entities/entity_descriptions.py` with `models=Inv.EVO` (or the appropriate model set).
 3. If it is a charge-period or special type, check `charge_period_descriptions.py` and related factories.
-4. Run `pytest tests` and update snapshots if prompted:  
+4. Run `pytest tests` and update snapshots if prompted:
    `pytest tests/__snapshots__/test_entity_descriptions/ -k EVO`
 5. Redeploy to HA and reload the integration.
 
@@ -106,7 +106,7 @@ Use the existing EVO entries in `entity_descriptions.py` (search for `Inv.EVO`) 
 
 ## Write service (ad‑hoc Modbus)
 
-**Developer tools → Services →** `foxess_modbus.write_register`  
+**Developer tools → Services →** `foxess_modbus.write_register`
 Use this to probe addresses from the PDF before adding permanent entities.
 
 ---

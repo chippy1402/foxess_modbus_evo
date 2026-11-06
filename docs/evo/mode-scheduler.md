@@ -24,32 +24,32 @@ See [README](README.md) for the hardware these results come from.
 
 ### Master switch block (48000–48009)
 
-| Register | Meaning | Status |
-|---|---|---|
-| `48000` | Mode Scheduler: `0` off (inverter follows `49203`), `1` on | ✅ |
-| `48001`–`48009` | always `0` | ✅ |
+| Register        | Meaning                                                    | Status |
+| --------------- | ---------------------------------------------------------- | ------ |
+| `48000`         | Mode Scheduler: `0` off (inverter follows `49203`), `1` on | ✅     |
+| `48001`–`48009` | always `0`                                                 | ✅     |
 
 Write the block as a whole, e.g. `1,0,0,0,0,0,0,0,0,0` to switch on. ✅ A single-register (FC6) write to
 `48000` returns `Exception Response(134, 6, IllegalAddress)`.
 
 ### Time groups
 
-Group *N* (1-based) starts at **`48010 + 10 × (N − 1)`**. The Fox app manages groups **1–8**. ✅ ⚠️ All
+Group _N_ (1-based) starts at **`48010 + 10 × (N − 1)`**. The Fox app manages groups **1–8**. ✅ ⚠️ All
 **96** groups (`48010`–`48969`) are readable on the EVO, matching Fox Cloud's `maxGroupCount: 96` — the FoxESS
 document says 24. Groups beyond 8 held disabled copies of earlier app schedules.
 
-| Offset | Meaning | Encoding | Status |
-|---|---|---|---|
-| +0 | Group enabled | `1` / `0` | ✅ |
-| +1 | Start time | `hour × 256 + minute` (e.g. `261` = 01:05) | ✅ |
-| +2 | End time | `hour × 256 + minute` (e.g. `5947` = 23:59) | ✅ |
-| +3 | Work mode | see [work-mode codes](#work-mode-codes) | ✅ |
-| +4 | Max SoC / Min SoC (on grid) | `max × 256 + min` (e.g. `21790` = 85 % / 30 %) | ✅ |
-| +5 | Cut-off SoC (`fdSoc`) | % — Force Charge stops at this SoC, Force Discharge stops at this SoC | ✅ |
-| +6 | Force charge / discharge power (`fdPwr`) | W | ✅ |
-| +7 | Unknown | always `0` observed | ❓ |
-| +8 | Flags | see below | ⚠️ |
-| +9 | Slot marker | `1` on groups 1–8, `0` on groups 9+ in every capture | ⚠️ ❓ |
+| Offset | Meaning                                  | Encoding                                                              | Status |
+| ------ | ---------------------------------------- | --------------------------------------------------------------------- | ------ |
+| +0     | Group enabled                            | `1` / `0`                                                             | ✅     |
+| +1     | Start time                               | `hour × 256 + minute` (e.g. `261` = 01:05)                            | ✅     |
+| +2     | End time                                 | `hour × 256 + minute` (e.g. `5947` = 23:59)                           | ✅     |
+| +3     | Work mode                                | see [work-mode codes](#work-mode-codes)                               | ✅     |
+| +4     | Max SoC / Min SoC (on grid)              | `max × 256 + min` (e.g. `21790` = 85 % / 30 %)                        | ✅     |
+| +5     | Cut-off SoC (`fdSoc`)                    | % — Force Charge stops at this SoC, Force Discharge stops at this SoC | ✅     |
+| +6     | Force charge / discharge power (`fdPwr`) | W                                                                     | ✅     |
+| +7     | Unknown                                  | always `0` observed                                                   | ❓     |
+| +8     | Flags                                    | see below                                                             | ⚠️     |
+| +9     | Slot marker                              | `1` on groups 1–8, `0` on groups 9+ in every capture                  | ⚠️ ❓  |
 
 **+8 flags.** ⚠️ The FoxESS document calls +7, +8 and +9 "reserved", but the app writes to them. In
 app-created slots +8 was `3` for Force Charge / Force Discharge, `1` for Feed-in and `0` for Self-Use; for
@@ -63,26 +63,26 @@ kept `1`. **Write the app's values, but don't verify this field after writing.**
 
 Slots use the same codes as `49203`:
 
-| Code | Mode | Status |
-|---|---|---|
-| 1 | Self Use | ✅ |
-| 2 | Feed-in First | ✅ (in a daytime slot: 1.39 kW solar, 0.25 kW house, 1.06 kW exported, battery idle) |
-| 3 | Back-up | ✅ |
-| 4 | Peak Shaving | ❓ listed in the FoxESS document; the Fox app doesn't offer it for slots |
-| 5 | PowerStation | ❓ listed in the FoxESS document |
-| 6 | Force Charge | ✅ |
-| 7 | Force Discharge | ✅ |
+| Code | Mode            | Status                                                                               |
+| ---- | --------------- | ------------------------------------------------------------------------------------ |
+| 1    | Self Use        | ✅                                                                                   |
+| 2    | Feed-in First   | ✅ (in a daytime slot: 1.39 kW solar, 0.25 kW house, 1.06 kW exported, battery idle) |
+| 3    | Back-up         | ✅                                                                                   |
+| 4    | Peak Shaving    | ❓ listed in the FoxESS document; the Fox app doesn't offer it for slots             |
+| 5    | PowerStation    | ❓ listed in the FoxESS document                                                     |
+| 6    | Force Charge    | ✅                                                                                   |
+| 7    | Force Discharge | ✅                                                                                   |
 
 Fox Cloud also lists `ForceCharge(BAT)` and `ForceDischarge(BAT)` slot modes; their codes are unknown.
 
 ## Example: a schedule created in the Fox app
 
-| Slot | Time | Mode | Settings |
-|---|---|---|---|
-| 1 | 01:05–02:35 | Force Charge | cut-off 95 %, power 11000 W |
-| 2 | 16:10–17:40 | Force Discharge | cut-off 25 %, power 12000 W |
-| 3 | 20:15–21:45 | Feed-in First | min 30 %, max 85 % |
-| (remaining) | 00:00–23:59 | Self-Use | min 10 %, max 100 % |
+| Slot        | Time        | Mode            | Settings                    |
+| ----------- | ----------- | --------------- | --------------------------- |
+| 1           | 01:05–02:35 | Force Charge    | cut-off 95 %, power 11000 W |
+| 2           | 16:10–17:40 | Force Discharge | cut-off 25 %, power 12000 W |
+| 3           | 20:15–21:45 | Feed-in First   | min 30 %, max 85 %          |
+| (remaining) | 00:00–23:59 | Self-Use        | min 10 %, max 100 %         |
 
 ```
 48000: 1
@@ -108,14 +108,14 @@ Fox Cloud also lists `ForceCharge(BAT)` and `ForceDischarge(BAT)` slot modes; th
 
 ## Write behaviour
 
-| Write | Scheduler | Result |
-|---|---|---|
-| 4 registers of a group (enable, start, end, mode), FC16 | on (set from the Fox app) | ✅ **rejected** |
-| all 10 registers of a disabled group, FC16 | on (set from the Fox app) | ✅ accepted, read back exactly |
-| all 10 registers of an enabled group, FC16 | on | ✅ accepted, read back exactly (except +8, see above) |
-| `48000` alone, FC6 | off | ✅ **rejected** (`IllegalAddress`) |
-| `48000`–`48009` as one block, FC16 | off → on, on → off | ✅ accepted |
-| groups 1–8 (`48010`–`48089`) as one 80-register block, FC16 | on | ✅ **accepted**, read back exactly — a whole schedule can be written atomically |
+| Write                                                       | Scheduler                 | Result                                                                          |
+| ----------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------- |
+| 4 registers of a group (enable, start, end, mode), FC16     | on (set from the Fox app) | ✅ **rejected**                                                                 |
+| all 10 registers of a disabled group, FC16                  | on (set from the Fox app) | ✅ accepted, read back exactly                                                  |
+| all 10 registers of an enabled group, FC16                  | on                        | ✅ accepted, read back exactly (except +8, see above)                           |
+| `48000` alone, FC6                                          | off                       | ✅ **rejected** (`IllegalAddress`)                                              |
+| `48000`–`48009` as one block, FC16                          | off → on, on → off        | ✅ accepted                                                                     |
+| groups 1–8 (`48010`–`48089`) as one 80-register block, FC16 | on                        | ✅ **accepted**, read back exactly — a whole schedule can be written atomically |
 
 ## Behaviour of a Force Charge slot
 
@@ -155,16 +155,16 @@ current SoC) before the all-day Self-Use slot:
 
 The Fox Cloud scheduler API holds the same data (see [Fox Cloud API](fox-cloud-api.md) for reliability):
 
-| Cloud field | Register |
-|---|---|
-| group `enable` | +0 (the cloud only lists enabled groups) |
-| `startHour` / `startMinute` | +1 |
-| `endHour` / `endMinute` | +2 |
-| `workMode` | +3 |
-| `extraParam.maxSoc` / `extraParam.minSocOnGrid` | +4 high / low byte |
-| `extraParam.fdSoc` | +5 |
-| `extraParam.fdPwr` | +6 |
-| top-level `enable` and `get/flag` → `enable` | `48000` (but the cloud does not track it, see Fox Cloud API) |
+| Cloud field                                     | Register                                                     |
+| ----------------------------------------------- | ------------------------------------------------------------ |
+| group `enable`                                  | +0 (the cloud only lists enabled groups)                     |
+| `startHour` / `startMinute`                     | +1                                                           |
+| `endHour` / `endMinute`                         | +2                                                           |
+| `workMode`                                      | +3                                                           |
+| `extraParam.maxSoc` / `extraParam.minSocOnGrid` | +4 high / low byte                                           |
+| `extraParam.fdSoc`                              | +5                                                           |
+| `extraParam.fdPwr`                              | +6                                                           |
+| top-level `enable` and `get/flag` → `enable`    | `48000` (but the cloud does not track it, see Fox Cloud API) |
 
 `pvLimit`, `importLimit`, `exportLimit`, `reactivePower` and `secondWorkMode` also appear in the cloud JSON;
 they were not found in the group block.
@@ -184,7 +184,7 @@ they were not found in the group block.
 
 ## Comparison with the FoxESS protocol document
 
-FoxESS's *Modbus Protocol V1.05.03.00* Table 3-11 "Time Period Table" has the same layout (`48000`
+FoxESS's _Modbus Protocol V1.05.03.00_ Table 3-11 "Time Period Table" has the same layout (`48000`
 "TimeMode Flag", 10-register groups from `48010`, fields +0…+6, the same work-mode codes). Differences
 and gaps found on the EVO are marked ⚠️ above. The document also states — ❓ untested on the EVO:
 

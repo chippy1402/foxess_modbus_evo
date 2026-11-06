@@ -4,6 +4,8 @@ HA only logs these at startup ("is using state class 'measurement' which is impo
 ('energy')"), so check them all here against HA's own tables.
 """
 
+# mypy: disable-error-code="attr-defined"
+
 from homeassistant.components.sensor import DEVICE_CLASS_STATE_CLASSES
 from homeassistant.components.sensor import DEVICE_CLASS_UNITS
 from homeassistant.components.sensor import SensorEntityDescription
